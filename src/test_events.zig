@@ -6,10 +6,10 @@ test {
     try sdl.init(.{ .events = true });
     defer sdl.quit();
 
-    sdl.setEventDisabled(.KeyDown, true);
-    try expect(sdl.isEventDisabled(.KeyDown));
-    sdl.setEventDisabled(.KeyDown, false);
-    try expect(!sdl.isEventDisabled(.KeyDown));
+    sdl.setEventDisabled(.key_down, true);
+    try expect(sdl.isEventDisabled(.key_down));
+    sdl.setEventDisabled(.key_down, false);
+    try expect(!sdl.isEventDisabled(.key_down));
 }
 
 fn event_filter_pass(userdata: ?*c_void, event: *sdl.Event) c_int {
