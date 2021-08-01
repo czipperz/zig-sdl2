@@ -87,6 +87,10 @@ pub const Surface = extern struct {
         return surface;
     }
 
+    pub fn duplicate(surface: *Surface) !*Surface {
+        return c.SDL_DuplicateSurface(surface) orelse error.OutOfMemory;
+    }
+
     pub fn deinit(surface: *Surface) void {
         c.SDL_FreeSurface(surface);
     }
@@ -178,16 +182,106 @@ pub const Surface = extern struct {
 
     pub fn getBlendMode(surface: *Surface) !BlendMode {
         var blend_mode: u32 = undefined;
-        if (c.SDL_SetSurfaceBlendMode(surface.native(), &blend_mode) < 0)
+        if (c.SDL_GetSurfaceBlendMode(surface.native(), &blend_mode) < 0)
             return error.SDL2_InvalidSurface;
         return @intToEnum(BlendMode, blend_mode);
     }
 
+    /// Set the clip rectangle (or disable if `rect == null`).
+    /// Returns if the rectangle intersects with the surface.
+    pub fn setClipRect(surface: *Surface, rect: ?Rect) bool {
+        if (c.SDL_SetSurfaceClipRect(surface.native(), &rect) < 0)
+            return error.SDL2_InvalidSurface;
+    }
+
+    pub fn getClipRect(surface: *Surface) Rect {
+        var rect: Rect = undefined;
+        c.SDL_GetSurfaceClipRect(surface.native(), @ptrCast(*c.SDL_Rect, &rect));
+        return rect;
+    }
+
+    pub fn fillRect(surface: *Surface, rect: ?Rect, color: u32) !void {
+        if (c.SDL_FillRect(surface.native(), @ptrCast(*const c.SDL_Rect, &rect), color) < 0)
+            return error.SDL2_Video;
+    }
+
+    pub fn fillRects(surface: *Surface, rects: []const Rect, color: u32) !void {
+        if (c.SDL_FillRects(surface.native(), @ptrCast(*const c.SDL_Rect, rects.ptr), @intCast(c_int, rects.len), color) < 0)
+            return error.SDL2_Video;
+    }
 };
+
+/// Copy and convert a block of pixels from one format to another.
+pub fn convertPixels(w: c_int, h: c_int, src_format: u32, src: *const c_void, src_pitch: c_int,
+                     dst_format: u32, dst: *c_void, dst_pitch: c_int) !void {
+    if (c.SDL_ConvertPixels(w, h, src_format, src, src_pitch,
+                            dst_format, dst, dst_pitch) < 0)
+        return error.SDL2_ConvertPixels;
+}
 
 /// Function type used for blitting.
 pub const Blit = fn (src: *Surface, src_rect: ?*Rect,
                      dest: *Surface, dest_rect: ?*Rect) c_int;
+
+/// Blit source onto destination.
+pub fn blitSurface(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint: ?Point) !Rect {
+    // Expand the point to a rectangle.  Default is 0, 0.
+    var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
+                 else Rect{ .x=0, .y=0, .w=0, .h=0 };
+    if (c.SDL_BlitSurface(src, &srcrect, dst, &result) < 0)
+        return error.SDL2_Video;
+    return result;
+}
+
+/// Blit source onto destination but don't clip or validate the rectangles.
+pub fn blitSurfaceNoClip(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint: ?Point) !Rect {
+    // For some reason it takes the rectangle as mutable so make a local copy.
+    var local_srcrect = srcrect;
+
+    // Expand the point to a rectangle.  Default is 0, 0.
+    var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
+                 else Rect{ .x=0, .y=0, .w=0, .h=0 };
+
+    if (c.SDL_LowerBlit(src, &local_srcrect, dst, &result) < 0)
+        return error.SDL2_Video;
+    return result;
+}
+
+/// Blit source onto destination, stretching the source to fit
+/// the destination.  Fast and low quality.  Not thread safe.
+pub fn blitSurfaceStretch(src: *Surface, srcrect: ?Rect, dst: *Surface, dstrect: ?Rect) !void {
+    if (c.SDL_SoftStretch(src, &srcrect, dst, &dstrect) < 0)
+        return error.SDL2_Video;
+}
+
+
+
+/// Blit source onto destination.
+pub fn blitSurfaceScaled(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint: ?Point) !Rect {
+    // Expand the point to a rectangle.  Default is 0, 0.
+    var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
+                 else Rect{ .x=0, .y=0, .w=0, .h=0 };
+    if (c.SDL_BlitScaled(src, &srcrect, dst, &result) < 0)
+        return error.SDL2_Video;
+    return result;
+}
+
+/// Blit source onto destination but don't clip or validate the rectangles.
+pub fn blitSurfaceScaledNoClip(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint: ?Point) !Rect {
+    // For some reason it takes the rectangle as mutable so make a local copy.
+    var local_srcrect = srcrect;
+
+    // Expand the point to a rectangle.  Default is 0, 0.
+    var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
+                 else Rect{ .x=0, .y=0, .w=0, .h=0 };
+
+    if (c.SDL_LowerBlitScaled(src, &local_srcrect, dst, &result) < 0)
+        return error.SDL2_Video;
+    return result;
+}
+
+
+
 
 /// Formula used to convert between YUV and RGB.
 pub const YuvConversionMode = enum(u32) {
@@ -200,3 +294,13 @@ pub const YuvConversionMode = enum(u32) {
     /// BT.601 for SD content, BT.709 for HD content.
     automatic,
 };
+
+pub fn setYuvConversionMode(mode: YuvConversionMode) void {
+    c.SDL_SetYuvConversionMode(@enumToInt(mode));
+}
+pub fn getYuvConversionMode() YuvConversionMode {
+    return @intToEnum(YuvConversionMode, c.SDL_GetYuvConversionMode());
+}
+pub fn getYuvConversionModeForResolution(w: c_int, h: c_int) YuvConversionMode {
+    return @intToEnum(YuvConversionMode, c.SDL_GetYuvConversionModeForResolution(w, h));
+}
