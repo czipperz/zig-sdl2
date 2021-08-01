@@ -689,7 +689,7 @@ pub fn flushEvents(minType: EventType, maxType: EventType) void {
 /// Get the next event, or immediately return `null`.
 pub fn pollEvent() ?Event {
     var event: Event = undefined;
-    if (!c.SDL_PollEvent(&event) == 0) return null;
+    if (c.SDL_PollEvent(@ptrCast(*c.SDL_Event, &event)) == 0) return null;
     return event;
 }
 
@@ -708,7 +708,7 @@ pub fn waitEventTimeout(timeout: u32) ?Event {
 }
 
 pub fn pushEvent(event: Event) Error!bool {
-    const res = c.SDL_PushEvent(&event);
+    const res = c.SDL_PushEvent(@ptrCast(*c.SDL_Event, &event));
     if (res == -1) return error.PushEvent;
     return res == 1;
 }
