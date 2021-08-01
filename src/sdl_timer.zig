@@ -9,7 +9,7 @@ pub fn getTicks() u32 {
 
 /// Test if `first` has passed `second`.
 pub fn ticksPassed(first: u32, second: u32) bool {
-    return c.SDL_TICKS_PASSED(first, second) != 0;
+    return @intCast(i32, second - first) <= 0;
 }
 
 /// Get high resolution counter value.
@@ -20,6 +20,20 @@ pub fn getPerformanceCounter() u64 {
 /// Get the number of counts per second of the  high resolution counter.
 pub fn getPerformanceFrequency() u64 {
     return c.SDL_GetPerformanceFrequency();
+}
+
+/// Delay for `ticks` milliseconds.
+pub fn delay(ticks: u32) void {
+    c.SDL_Delay(ticks);
+}
+
+/// Delay until `ticks` has been reached (where `ticks` is
+/// the number of milliseconds since SDL was initialized).
+pub fn delayUntil(ticks: u32) void {
+    const now = getTicks();
+    if (!ticksPassed(now, ticks)) {
+        delay(ticks - now);
+    }
 }
 
 /// The callback is called when `interval` ticks have elapsed.  Return the
