@@ -6,3 +6,6 @@ pub usingnamespace @import("sdl_pixels.zig");
 pub usingnamespace @import("sdl_video.zig");
 pub usingnamespace @import("sdl_keyboard.zig");
 pub usingnamespace @import("sdl_timer.zig");
+pub usingnamespace @import("sdl_rwops.zig");
+pub usingnamespace @import("sdl_surface.zig");
+pub usingnamespace @import("sdl_blendmode.zig");
