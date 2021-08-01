@@ -9,7 +9,7 @@ pub fn getTicks() u32 {
 
 /// Test if `first` has passed `second`.
 pub fn ticksPassed(first: u32, second: u32) bool {
-    return @intCast(i32, second - first) <= 0;
+    return @bitCast(i32, second -% first) <= 0;
 }
 
 /// Get high resolution counter value.
