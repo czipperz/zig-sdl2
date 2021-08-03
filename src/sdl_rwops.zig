@@ -1,5 +1,5 @@
-const c = @cImport(@cInclude("SDL.h"));
 const std = @import("std");
+const c = @import("sdl_c.zig");
 
 pub const StreamType = enum(u32) {
     unknown   = c.SDL_RWOPS_UNKNOWN,

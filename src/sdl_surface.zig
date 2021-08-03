@@ -1,5 +1,5 @@
-const c = @cImport(@cInclude("SDL.h"));
 const std = @import("std");
+const c = @import("sdl_c.zig");
 pub usingnamespace @import("sdl_pixels.zig");
 pub usingnamespace @import("sdl_rect.zig");
 pub usingnamespace @import("sdl_rwops.zig");

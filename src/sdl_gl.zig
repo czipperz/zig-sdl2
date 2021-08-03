@@ -1,3 +1,5 @@
+const c = @import("sdl_c.zig");
+
 /// Opaque handle to an OpenGL context.
 pub const Context = *c_void;
 

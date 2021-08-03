@@ -1,5 +1,5 @@
-const c = @cImport(@cInclude("SDL.h"));
 const std = @import("std");
+const c = @import("sdl_c.zig");
 
 comptime { std.debug.assert(@sizeOf(Keycode) == @sizeOf(c.SDL_Keycode)); }
 

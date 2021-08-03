@@ -1,3 +1,5 @@
+const c = @import("sdl_c.zig");
+
 pub const Point = extern struct {
     x: c_int,
     y: c_int,

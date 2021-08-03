@@ -1,5 +1,5 @@
-const c = @cImport(@cInclude("SDL.h"));
 const std = @import("std");
+const c = @import("sdl_c.zig");
 pub usingnamespace @import("sdl_keycode.zig");
 pub usingnamespace @import("sdl_scancode.zig");
 

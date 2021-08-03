@@ -1,5 +1,5 @@
-const c = @cImport(@cInclude("SDL.h"));
 const std = @import("std");
+const c = @import("sdl_c.zig");
 usingnamespace @import("sdl_general.zig");
 
 /// Get ticks (milliseconds) since SDL library initialization.
