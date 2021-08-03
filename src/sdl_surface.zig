@@ -190,7 +190,7 @@ pub const Surface = extern struct {
     /// Set the clip rectangle (or disable if `rect == null`).
     /// Returns if the rectangle intersects with the surface.
     pub fn setClipRect(surface: *Surface, rect: ?Rect) bool {
-        if (c.SDL_SetSurfaceClipRect(surface.native(), &rect) < 0)
+        if (c.SDL_SetSurfaceClipRect(surface.native(), rectconv(&rect)) < 0)
             return error.SDL2_InvalidSurface;
     }
 
@@ -201,7 +201,7 @@ pub const Surface = extern struct {
     }
 
     pub fn fillRect(surface: *Surface, rect: ?Rect, color: u32) !void {
-        if (c.SDL_FillRect(surface.native(), @ptrCast(*const c.SDL_Rect, &rect), color) < 0)
+        if (c.SDL_FillRect(surface.native(), rectconv(&rect), color) < 0)
             return error.SDL2_Video;
     }
 
@@ -226,9 +226,9 @@ pub const Blit = fn (src: *Surface, src_rect: ?*Rect,
 /// Blit source onto destination.
 pub fn blitSurface(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint: ?Point) !Rect {
     // Expand the point to a rectangle.  Default is 0, 0.
-    var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
+    var result = if (dstpoint) |dp| Rect{ .x=dp.x, .y=dp.y, .w=0, .h=0 }
                  else Rect{ .x=0, .y=0, .w=0, .h=0 };
-    if (c.SDL_BlitSurface(src, &srcrect, dst, &result) < 0)
+    if (c.SDL_BlitSurface(src.native(), rectconv(&srcrect), dst.native(), @ptrCast(*c.SDL_Rect, &result)) < 0)
         return error.SDL2_Video;
     return result;
 }
@@ -242,7 +242,7 @@ pub fn blitSurfaceNoClip(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint:
     var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
                  else Rect{ .x=0, .y=0, .w=0, .h=0 };
 
-    if (c.SDL_LowerBlit(src, &local_srcrect, dst, &result) < 0)
+    if (c.SDL_LowerBlit(src.native(), rectconv(&local_srcrect), dst.native(), @ptrCast(*c.SDL_Rect, &result)) < 0)
         return error.SDL2_Video;
     return result;
 }
@@ -250,7 +250,7 @@ pub fn blitSurfaceNoClip(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint:
 /// Blit source onto destination, stretching the source to fit
 /// the destination.  Fast and low quality.  Not thread safe.
 pub fn blitSurfaceStretch(src: *Surface, srcrect: ?Rect, dst: *Surface, dstrect: ?Rect) !void {
-    if (c.SDL_SoftStretch(src, &srcrect, dst, &dstrect) < 0)
+    if (c.SDL_SoftStretch(src.native(), rectconv(&srcrect), dst.native(), &dstrect) < 0)
         return error.SDL2_Video;
 }
 
@@ -261,7 +261,7 @@ pub fn blitSurfaceScaled(src: *Surface, srcrect: ?Rect, dst: *Surface, dstpoint:
     // Expand the point to a rectangle.  Default is 0, 0.
     var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
                  else Rect{ .x=0, .y=0, .w=0, .h=0 };
-    if (c.SDL_BlitScaled(src, &srcrect, dst, &result) < 0)
+    if (c.SDL_BlitScaled(src.native(), rectconv(&srcrect), dst.native(), &result) < 0)
         return error.SDL2_Video;
     return result;
 }
@@ -275,7 +275,7 @@ pub fn blitSurfaceScaledNoClip(src: *Surface, srcrect: ?Rect, dst: *Surface, dst
     var result = if (dstpoint) Rect{ .x=dstpoint.x, .y=dstpoint.y, .w=0, .h=0 }
                  else Rect{ .x=0, .y=0, .w=0, .h=0 };
 
-    if (c.SDL_LowerBlitScaled(src, &local_srcrect, dst, &result) < 0)
+    if (c.SDL_LowerBlitScaled(src.native(), rectconv(&local_srcrect), dst.native(), &result) < 0)
         return error.SDL2_Video;
     return result;
 }

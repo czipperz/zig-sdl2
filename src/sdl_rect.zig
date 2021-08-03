@@ -58,7 +58,7 @@ pub const Rect = extern struct {
     pub fn enclosing(points: []Point, clip: ?Rect) ?Rect {
         var result: Rect = undefined;
         if (c.SDL_EnclosePoints(points.ptr, @intCast(c_int, points.len),
-                                if (clip) &clip else null, &result) == 0)
+                                rectconv(&clip), &result) == 0)
             return null;
         return result;
     }
@@ -71,6 +71,10 @@ pub const Rect = extern struct {
         return result;
     }
 };
+
+pub fn rectconv(pr: *const ?Rect) [*c]const c.SDL_Rect {
+    return if (pr.*) |*r| @ptrCast(*const c.SDL_Rect, r) else null;
+}
 
 pub const FRect = extern struct {
     x: c_float,
