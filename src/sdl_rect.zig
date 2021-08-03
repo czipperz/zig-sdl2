@@ -82,3 +82,6 @@ pub const FRect = extern struct {
     w: c_float,
     h: c_float,
 };
+
+/// This isn't an SDL type but we use it for convenience.
+pub const Dimension = struct { w: c_int, h: c_int };

@@ -3,8 +3,10 @@ const c = @import("sdl_c.zig");
 usingnamespace @import("sdl_general.zig");
 usingnamespace @import("sdl_rect.zig");
 usingnamespace @import("sdl_pixels.zig");
+usingnamespace @import("sdl_surface.zig");
 pub const gl = @import("sdl_gl.zig");
 pub const display = @import("sdl_video_display.zig");
+pub const screen_saver = @import("sdl_video_screen_saver.zig");
 
 pub const Window = c.SDL_Window;
 
@@ -239,14 +241,12 @@ pub fn setWindowSize(window: *Window, w: c_int, h: c_int) void {
     c.SDL_SetWindowSize(window, w, h);
 }
 
-pub const WindowSizePair = struct { w: c_int, h: c_int };
-
 /// Get the size of a window's client area.
-pub fn getWindowSize(window: *Window) WindowSizePair {
+pub fn getWindowSize(window: *Window) Dimension {
     var w: c_int = undefined;
     var h: c_int = undefined;
     c.SDL_GetWindowSize(window, &w, &h);
-    return .{ w, h };
+    return .{ .w = w, .h = h };
 }
 
 pub const WindowBordersSize = struct {
@@ -261,4 +261,153 @@ pub fn getWindowBordersSize(window: *Window) ?WindowBordersSize {
     var right: c_int = undefined;
     if (c.SDL_GetWindowBordersSize(window, &top, &left, &bottom, &right) < 0) return null;
     return .{ top, left, bottom, right };
+}
+
+pub fn setWindowMinimumSize(window: *Window, min_w: c_int, min_h: c_int) void {
+    c.SDL_SetWindowMinimumSize(window, min_w, min_h);
+}
+
+pub fn getWindowMinimumSize(window: *Window) Dimension {
+    var d: Dimension = undefined;
+    c.SDL_GetWindowMinimumSize(window, &d.w, &d.h);
+    return d;
+}
+
+pub fn setWindowMaximumSize(window: *Window, min_w: c_int, min_h: c_int) void {
+    c.SDL_SetWindowMaximumSize(window, min_w, min_h);
+}
+
+pub fn getWindowMaximumSize(window: *Window) Dimension {
+    var d: Dimension = undefined;
+    c.SDL_GetWindowMaximumSize(window, &d.w, &d.h);
+    return d;
+}
+
+pub fn setWindowBordered(window: *Window, bordered: bool) void {
+    c.SDL_SetWindowBordered(window, bordered);
+}
+
+pub fn setWindowResizable(window: *Window, resizable: bool) void {
+    c.SDL_SetWindowResizable(window, resizable);
+}
+
+pub fn showWindow(window: *Window) void {
+    c.SDL_ShowWindow(window);
+}
+pub fn hideWindow(window: *Window) void {
+    c.SDL_HideWindow(window);
+}
+
+/// Raise the window to the front and focus it.
+pub fn raiseWindow(window: *Window) void {
+    c.SDL_RaiseWindow(window);
+}
+/// Focus the window without raising it.
+pub fn focusNoRaiseWindow(window: *Window) !void {
+    if (c.SDL_SetWidowInputFocus(window) < 0)
+        return error.SDL2_Video;
+}
+pub fn maximizeWindow(window: *Window) void {
+    c.SDL_MaximizeWindow(window);
+}
+pub fn minimizeWindow(window: *Window) void {
+    c.SDL_MinimizeWindow(window);
+}
+pub fn restoreWindow(window: *Window) void {
+    c.SDL_RestoreWindow(window);
+}
+
+pub fn setWindowFullscreen(window: *Window, flags: u32) !void {
+    if (c.SDL_SetWindowFullscreen(window, flags) < 0)
+        return error.SDL2_Video;
+}
+
+pub fn getWindowSurface(window: *Window) ?*Surface {
+    return @ptrCast(?*Surface, c.SDL_GetWindowSurface(window));
+}
+
+pub fn updateWindowSurface(window: *Window) !void {
+    if (c.SDL_UpdateWindowSurface(window) < 0)
+        return error.SDL2_Video;
+}
+
+pub fn updateWindowSurfaceRects(window: *Window, rects: []const Rect) !void {
+    if (c.SDL_UpdateWindowSurfaceRects(window, @ptrCast(c.SDL_Rect, rects.ptr),
+                                       @intCast(c_int, rects.len)) < 0)
+        return error.SDL2_Video;
+}
+
+pub fn setWindowGrab(window: *Window, grabbed: bool) void {
+    c.SDL_SetWindowGrab(window, @boolToInt(grabbed));
+}
+pub fn getWindowGrab(window: *Window) bool {
+    return c.SDL_SetWindowGrab(window) != 0;
+}
+
+pub fn getGrabbedWindow() ?*Window {
+    return c.SDL_GetGrabbedWindow();
+}
+
+pub fn setWindowBrightness(window: *Window, brightness: f32) !void {
+    if (c.SDL_SetWindowBrightness(window, @floatCast(c_float, brightness)) < 0)
+        return error.SDL2_Video;
+}
+pub fn getWindowBrightness(window: *Window) f32 {
+    return @floatCast(f32, c.SDL_GetWindowBrightness(window));
+}
+
+pub fn setWindowOpacity(window: *Window, opacity: f32) !void {
+    if (c.SDL_SetWindowOpacity(window, @floatCast(c_float, opacity)) < 0)
+        return error.SDL2_Video;
+}
+pub fn getWindowOpacity(window: *Window) f32 {
+    var result: c_float = undefined;
+    if (c.SDL_GetWindowOpacity(window, &result) < 0)
+        return error.SDL2_Video;
+    return @floatCast(f32, result);
+}
+
+pub fn setWindowAsModalFor(modal: *Window, parent: *Window) !void {
+    if (c.SDL_SetWindowModalFor(modal, parent) < 0)
+        return error.SDL2_Video;
+}
+
+pub fn setWindowGammaRamp(window: *Window, red: []const u16, green: []const u16, blue: []const u16) !void {
+    std.debug.assert(red.len >= 256);
+    std.debug.assert(green.len >= 256);
+    std.debug.assert(blue.len >= 256);
+    if (c.SDL_SetWindowGammaRamp(window, red.ptr, green.ptr, blue.ptr) < 0)
+        return error.SDL2_Video;
+}
+
+pub fn getWindowGammaRamp(window: *Window, red: []u16, green: []u16, blue: []u16) !void {
+    std.debug.assert(red.len >= 256);
+    std.debug.assert(green.len >= 256);
+    std.debug.assert(blue.len >= 256);
+    if (c.SDL_SetWindowGammaRamp(window, red.ptr, green.ptr, blue.ptr) < 0)
+        return error.SDL2_Video;
+}
+
+pub const HitTestResult = enum(u32) {
+    /// Region is normal. No special properties.
+    normal             = c.SDL_HITTEST_NORMAL,
+
+    /// Region can drag entire window.
+    draggable          = c.SDL_HITTEST_DRAGGABLE,
+
+    resize_topleft     = c.SDL_HITTEST_RESIZE_TOPLEFT,
+    resize_top         = c.SDL_HITTEST_RESIZE_TOP,
+    resize_topright    = c.SDL_HITTEST_RESIZE_TOPRIGHT,
+    resize_right       = c.SDL_HITTEST_RESIZE_RIGHT,
+    resize_bottomright = c.SDL_HITTEST_RESIZE_BOTTOMRIGHT,
+    resize_bottom      = c.SDL_HITTEST_RESIZE_BOTTOM,
+    resize_bottomleft  = c.SDL_HITTEST_RESIZE_BOTTOMLEFT,
+    resize_left        = c.SDL_HITTEST_RESIZE_LEFT
+};
+
+pub const HitTest = fn (window: *Window, areao: *const Point, data: ?*c_void) HitTestResult;
+
+pub fn setWindowHitTest(window: *Window, callback: HitTest, callback_data: ?*c_void) !void {
+    if (c.SDL_SetWindowHitTest(window, callback, callback_data) < 0)
+        return error.SDL2_Video;
 }
