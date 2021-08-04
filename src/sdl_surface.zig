@@ -200,8 +200,13 @@ pub const Surface = extern struct {
         return rect;
     }
 
-    pub fn fillRect(surface: *Surface, rect: ?Rect, color: u32) !void {
-        if (c.SDL_FillRect(surface.native(), rectconv(&rect), color) < 0)
+    pub fn fill(surface: *Surface, color: u32) !void {
+        if (c.SDL_FillRect(surface.native(), null, color) < 0)
+            return error.SDL2_Video;
+    }
+
+    pub fn fillRect(surface: *Surface, rect: Rect, color: u32) !void {
+        if (c.SDL_FillRect(surface.native(), @ptrCast(*const c.SDL_Rect, &rect), color) < 0)
             return error.SDL2_Video;
     }
 
