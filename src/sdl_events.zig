@@ -2,6 +2,7 @@ const std = @import("std");
 const c = @import("sdl_c.zig");
 usingnamespace @import("sdl_general.zig");
 usingnamespace @import("sdl_keyboard.zig");
+usingnamespace @import("sdl_mouse.zig");
 
 pub const Event = extern union {
     type: EventType,
@@ -350,7 +351,7 @@ pub const MouseButtonEvent = extern struct {
     /// The mouse instance id, or SDL_TOUCH_MOUSEID
     which: u32,
     /// The mouse button index
-    button: u8,
+    button: Button,
     /// ::SDL_PRESSED or ::SDL_RELEASED
     state: u8,
     /// 1 for single-click, 2 for double-click, etc.
