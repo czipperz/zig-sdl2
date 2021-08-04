@@ -55,6 +55,11 @@ pub const Rect = extern struct {
         return result;
     }
 
+    pub fn contains(rect: Rect, point: Point) bool {
+        return rect.x <= point.x and point.x < rect.x + rect.w
+           and rect.y <= point.y and point.y < rect.y + rect.h;
+    }
+
     pub fn enclosing(points: []Point, clip: ?Rect) ?Rect {
         var result: Rect = undefined;
         if (c.SDL_EnclosePoints(points.ptr, @intCast(c_int, points.len),
