@@ -131,6 +131,12 @@ pub const PixelFormatEnum = enum(u32) {
 pub const Color = c.SDL_Color;
 pub const Colour = Color;
 
+pub const ColorRGB = struct {
+    r: u8,
+    g: u8,
+    b: u8,
+};
+
 pub const Palette = c.SDL_Palette;
 pub const PixelFormat = c.SDL_PixelFormat;
 
@@ -173,6 +179,9 @@ pub fn mapRGBA(format: *const PixelFormat, r: u8, g: u8, b: u8, a: u8) u32 {
 pub fn mapColor(format: *const PixelFormat, color: Color) u32 {
     return mapRGBA(format, color.r, color.g, color.b, color.a);
 }
+pub fn mapColorRGB(format: *const PixelFormat, color: ColorRGB) u32 {
+    return mapRGB(format, color.r, color.g, color.b);
+}
 
 pub fn getRGB(format: *const PixelFormat, pixel: u32, r: *u8, g: *u8, b: *u8) void {
     c.SDL_GetRGB(pixel, format, r, g, b);
@@ -183,6 +192,11 @@ pub fn getRGBA(format: *const PixelFormat, pixel: u32, r: *u8, g: *u8, b: *u8, a
 pub fn getColor(format: *const PixelFormat, pixel: u32) Color {
     var color: Color = undefined;
     getRGBA(pixel, format, &color.r, &color.b, &color.g, &color.a);
+    return color;
+}
+pub fn getColorRGB(format: *const PixelFormat, pixel: u32) ColorRGB {
+    var color: ColorRGB = undefined;
+    getRGB(pixel, format, &color.r, &color.b, &color.g);
     return color;
 }
 
