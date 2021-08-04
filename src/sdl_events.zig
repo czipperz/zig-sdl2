@@ -198,18 +198,19 @@ pub const DisplayEvent = extern struct {
     /// The associated display index
     display: u32,
     /// ::SDL_DisplayEventID
-    event: u8,
+    event: EventId,
     padding1: u8,
     padding2: u8,
     padding3: u8,
     /// event dependent data
     data1: i32,
 
-    // Event IDs:
-    /// Never used
-    const none = c.SDL_DISPLAYEVENT_NONE;
-    /// Display orientation has changed to data1
-    const orientation = c.SDL_DISPLAYEVENT_ORIENTATION;
+    const EventId = enum(u8) {
+        /// Never used
+        none = c.SDL_DISPLAYEVENT_NONE,
+        /// Display orientation has changed to data1
+        orientation = c.SDL_DISPLAYEVENT_ORIENTATION,
+    };
 };
 
 /// \brief Window state change event data (event.window.*)
@@ -221,7 +222,7 @@ pub const WindowEvent = extern struct {
     /// The associated window
     windowID: u32,
     /// ::SDL_WindowEventID
-    event: u8,
+    event: EventId,
     padding1: u8,
     padding2: u8,
     padding3: u8,
@@ -230,43 +231,44 @@ pub const WindowEvent = extern struct {
     /// event dependent data
     data2: i32,
 
-    // Event IDs:
-    /// Never used
-    const none = c.SDL_WINDOWEVENT_NONE;
-    /// Window has been shown
-    const shown = c.SDL_WINDOWEVENT_SHOWN;
-    /// Window has been hidden
-    const hidden = c.SDL_WINDOWEVENT_HIDDEN;
-    /// Window has been exposed and should be redrawn
-    const exposed = c.SDL_WINDOWEVENT_EXPOSED;
-    /// Window has been moved to data1, data2
-    const moved = c.SDL_WINDOWEVENT_MOVED;
-    /// Window has been resized to data1xdata2
-    const resized = c.SDL_WINDOWEVENT_RESIZED;
-    /// The window size has changed, either as a result of an API
-    /// call or through the system or user changing the window size.
-    const size_changed = c.SDL_WINDOWEVENT_SIZE_CHANGED;
-    /// Window has been minimized
-    const minimized = c.SDL_WINDOWEVENT_MINIMIZED;
-    /// Window has been maximized
-    const maximized = c.SDL_WINDOWEVENT_MAXIMIZED;
-    /// Window has been restored to normal size and position
-    const restored = c.SDL_WINDOWEVENT_RESTORED;
-    /// Window has gained mouse focus
-    const enter = c.SDL_WINDOWEVENT_ENTER;
-    /// Window has lost mouse focus
-    const leave = c.SDL_WINDOWEVENT_LEAVE;
-    /// Window has gained keyboard focus
-    const focus_gained = c.SDL_WINDOWEVENT_FOCUS_GAINED;
-    /// Window has lost keyboard focus
-    const focus_lost = c.SDL_WINDOWEVENT_FOCUS_LOST;
-    /// The window manager requests that the window be closed
-    const close = c.SDL_WINDOWEVENT_CLOSE;
-    /// Window is being offered a focus (should `SetWindowInputFocus()`
-    /// on itself or a subwindow, or ignore)
-    const take_focus = c.SDL_WINDOWEVENT_TAKE_FOCUS;
-    /// Window had a hit test that wasn't SDL_HITTEST_NORMAL.
-    const hit_test = c.SDL_WINDOWEVENT_HIT_TEST;
+    const EventId = enum(u8) {
+        /// Never used
+        none = c.SDL_WINDOWEVENT_NONE,
+        /// Window has been shown
+        shown = c.SDL_WINDOWEVENT_SHOWN,
+        /// Window has been hidden
+        hidden = c.SDL_WINDOWEVENT_HIDDEN,
+        /// Window has been exposed and should be redrawn
+        exposed = c.SDL_WINDOWEVENT_EXPOSED,
+        /// Window has been moved to data1, data2
+        moved = c.SDL_WINDOWEVENT_MOVED,
+        /// Window has been resized to data1xdata2
+        resized = c.SDL_WINDOWEVENT_RESIZED,
+        /// The window size has changed, either as a result of an API
+        /// call or through the system or user changing the window size.
+        size_changed = c.SDL_WINDOWEVENT_SIZE_CHANGED,
+        /// Window has been minimized
+        minimized = c.SDL_WINDOWEVENT_MINIMIZED,
+        /// Window has been maximized
+        maximized = c.SDL_WINDOWEVENT_MAXIMIZED,
+        /// Window has been restored to normal size and position
+        restored = c.SDL_WINDOWEVENT_RESTORED,
+        /// Window has gained mouse focus
+        enter = c.SDL_WINDOWEVENT_ENTER,
+        /// Window has lost mouse focus
+        leave = c.SDL_WINDOWEVENT_LEAVE,
+        /// Window has gained keyboard focus
+        focus_gained = c.SDL_WINDOWEVENT_FOCUS_GAINED,
+        /// Window has lost keyboard focus
+        focus_lost = c.SDL_WINDOWEVENT_FOCUS_LOST,
+        /// The window manager requests that the window be closed
+        close = c.SDL_WINDOWEVENT_CLOSE,
+        /// Window is being offered a focus (should `SetWindowInputFocus()`
+        /// on itself or a subwindow, or ignore)
+        take_focus = c.SDL_WINDOWEVENT_TAKE_FOCUS,
+        /// Window had a hit test that wasn't SDL_HITTEST_NORMAL.
+        hit_test = c.SDL_WINDOWEVENT_HIT_TEST,
+    };
 };
 
 /// \brief Keyboard button event structure (event.key.*)
